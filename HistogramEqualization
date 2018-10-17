@@ -1,0 +1,64 @@
+#Histogram Equalization
+
+import cv2
+import numpy as np 
+from PIL import Image
+from matplotlib import pyplot as plt 
+
+color = cv2.imread('bird.jpg')
+grayscale = cv2.cvtColor(color, cv2.COLOR_RGB2GRAY)
+cv2.imwrite('gray_bird.jpg', grayscale)
+gray = cv2.imread('bird.jpg',0)
+
+#NxM image
+N = gray.shape[0] 
+M = gray.shape[1]
+G = 256
+
+#step-1
+H = np.zeros(G) 
+
+#step-2
+for i in range(0, N):
+    for j in range(0, M):
+        H[gray[i][j]] = H[gray[i][j]] + 1  
+
+#step-3
+Hc = np.zeros(G)       
+Hc[0] = H[0]
+for p in range(1, G):
+    Hc[p] = Hc[p-1] + H[p]
+
+#step-4
+calc = (G-1)/(N * M)
+T = np.zeros(G) 
+for p in range(0, G):
+    T[p] = round(calc * Hc[p])
+
+#step-5
+for p in range(0, N):
+    for q in range(0, M):
+        gray[p][q] = T[gray[p][q]]
+
+enhanced = np.zeros(G) 
+for p in range(0, N):
+    for q in range(0, M):
+        enhanced[gray[p][q]] = enhanced[gray[p][q]] + 1
+cv2.imwrite('enhanced_bird.jpg', gray)
+
+
+plt.plot(H)
+plt.title('Histogram')
+plt.show()
+
+plt.plot(Hc)
+plt.title('Cumulative Histogram')
+plt.show()
+
+plt.plot(T)
+plt.title('Transformation Function')
+plt.show()
+
+plt.plot(enhanced)
+plt.title('Enhanced')
+plt.show()
